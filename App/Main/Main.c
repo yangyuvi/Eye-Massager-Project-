@@ -110,10 +110,10 @@ static  void  Proc2msTask(void)
   static u8 s_iCnt5 = 0; 
   if(Get2msFlag()){//2ms¶¨Ê±
     Clr2msFlag();
-  
+    LEDFlicker(250);
     if(s_iCnt5 >= 4)
     {       
-      //ScanKeyOne(KEY_NAME_KEY1, ProcKeyUpKey1);
+      ScanKeyOne(KEY_NAME_KEY3, ProcKeyUpKey3);
       ScanKeyOne(KEY_NAME_KEY2, ProcKeyUpKey2);
       SetMotorMode(GetMode());
       
