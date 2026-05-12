@@ -36,7 +36,7 @@ static  i16 s_iDutyCycle = 0;  //用于存放占空比
 /*********************************************************************************************************
 *                                              内部函数声明
 *********************************************************************************************************/
-static void ConfigTimer3ForPWM(u16 arr, u16 psc);  //配置PWM
+static void ConfigTimerForPWM(u16 arr, u16 psc);  //配置PWM
 
 /*********************************************************************************************************
 *                                              内部函数实现
@@ -50,7 +50,7 @@ static void ConfigTimer3ForPWM(u16 arr, u16 psc);  //配置PWM
 * 创建日期：2026年05月12日
 * 注    意：
 *********************************************************************************************************/
-static void ConfigTimer3ForPWM(u16 arr, u16 psc)
+static void ConfigTimerForPWM(u16 arr, u16 psc)
 {
   GPIO_InitTypeDef GPIO_InitStructure;            //GPIO_InitStructure用于存放GPIO的参数
   TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure; //TIM_TimeBaseStructure用于存放定时器的基本参数
@@ -120,7 +120,7 @@ static void ConfigTimer3ForPWM(u16 arr, u16 psc)
 *********************************************************************************************************/
 void  InitPWM(void)
 {
-  ConfigTimer3ForPWM(99, 71);  //配置TIM3，72000000/(99+1)/(71+1)=10kHz
+  ConfigTimerForPWM(99, 71);  //配置TIM3，72000000/(99+1)/(71+1)=10kHz
   TIM_SetCompare1(TIM3, 0);         //设置初始值为0
   TIM_SetCompare2(TIM3, 0);         //设置初始值为0
   TIM_SetCompare3(TIM3, 0);         //设置初始值为0
