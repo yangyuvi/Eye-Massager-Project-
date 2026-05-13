@@ -24,7 +24,8 @@
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
-
+#define HYSTTEMP 1      //1°C的回差
+#define HIGHTEMP 50     //过热保护
 /*********************************************************************************************************
 *                                              枚举结构体定义
 *********************************************************************************************************/
@@ -52,18 +53,15 @@ static  void  ConfigHeatGPIO(void);  //配置Heat的GPIO
 *********************************************************************************************************/
 static  void  ConfigHeatGPIO(void)
 {
-  // GPIO_InitTypeDef GPIO_InitStructure;  //GPIO_InitStructure用于存放GPIO的参数
+  GPIO_InitTypeDef GPIO_InitStructure;  //GPIO_InitStructure用于存放GPIO的参数
                                                                      
-  // //使能RCC相关时钟
-  // RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); //使能GPIOC的时钟
+  //使能RCC相关时钟
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能GPIOB的时钟
                                                                                                                  
-  // GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_4;           //设置引脚
-  // GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
-  // GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;     //设置模式
-  // GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化LED1的GPIO
-
-  // GPIO_WriteBit(GPIOC, GPIO_Pin_4, Bit_SET);            //将LED1默认状态设置为点亮
-
+  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_7|GPIO_Pin_8|GPIO_Pin_9;           //设置引脚
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
+  GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;     //设置模式
+  GPIO_Init(GPIOB, &GPIO_InitStructure);                //根据参数初始化GPIO
 }
 
 /*********************************************************************************************************
@@ -80,19 +78,73 @@ static  void  ConfigHeatGPIO(void)
 *********************************************************************************************************/
 void InitHeat(void)
 {
-  ConfigHeatGPIO();  //配置Motor的GPIO
+  ConfigHeatGPIO();  //配置Heat的GPIO
 }
 
 /*********************************************************************************************************
-* 函数名称：DetectHeat
-* 函数功能：初始化Motor模块
+* 函数名称：HeatOn
+* 函数功能：开启加热模块
 * 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2018年01月01日
+* 创建日期：2026年05月12日
 * 注    意：
 *********************************************************************************************************/
-void DetectHeat(void)
+void HeatOn(void)
 {
+  GPIO_WriteBit(GPIOB, GPIO_Pin_7, Bit_SET);    
+  GPIO_WriteBit(GPIOB, GPIO_Pin_8, Bit_SET);  
+  GPIO_WriteBit(GPIOB, GPIO_Pin_9, Bit_SET);       
+}
+
+/*********************************************************************************************************
+* 函数名称：HeatOff
+* 函数功能：关闭加热模块
+* 输入参数：void
+* 输出参数：void
+* 返 回 值：void
+* 创建日期：2026年05月12日
+* 注    意：
+*********************************************************************************************************/
+void HeatOff(void)
+{
+  GPIO_WriteBit(GPIOB, GPIO_Pin_7, Bit_RESET);    
+  GPIO_WriteBit(GPIOB, GPIO_Pin_8, Bit_RESET);  
+  GPIO_WriteBit(GPIOB, GPIO_Pin_9, Bit_RESET);       
+}
+
+/*********************************************************************************************************
+* 函数名称：DetectTemp
+* 函数功能：检测温度模块
+* 输入参数：void
+* 输出参数：温度值
+* 返 回 值：u8
+* 创建日期：2026年05月12日
+* 注    意：
+*********************************************************************************************************/
+u8 DetectTemp(void)
+{
+  u8 temp=0;
   
+  return temp;
+}
+
+/*********************************************************************************************************
+* 函数名称：SetTemp
+* 函数功能：控制温度模块
+* 输入参数：要设定的温度temp
+* 输出参数：void
+* 返 回 值：void
+* 创建日期：2026年05月12日
+* 注    意：开关控制
+*********************************************************************************************************/
+void SetTemp(u8 temp)
+{
+  u8 nowTemp = DetectTemp();
+  if((nowTemp < temp - HYSTTEMP) && (nowTemp < HIGHTEMP)){   //当前温度小于设定温度
+    HeatOn();                           //开启加热
+  }
+  else if(nowTemp > temp + HYSTTEMP){
+    HeatOff();                          //关闭加热
+  }
 }

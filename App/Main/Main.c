@@ -84,7 +84,7 @@ static  void  InitHardware(void)
   SystemInit();       //系统初始化
   InitRCC();          //初始化RCC模块
   InitNVIC();         //初始化NVIC模块
-  InitUART1(115200);  //初始化UART模块
+  InitUART1(9600);    //初始化UART模块
   InitTimer();        //初始化Timer模块
   InitLED();          //初始化LED模块
   InitSysTick();      //初始化SysTick模块
@@ -108,22 +108,23 @@ static  void  InitHardware(void)
 static  void  Proc2msTask(void)
 {
   static u8 s_iCnt5 = 0; 
+
   if(Get2msFlag()){//2ms定时
     Clr2msFlag();
-    LEDFlicker(250);
+    
     if(s_iCnt5 >= 4)
     {       
-      ScanKeyOne(KEY_NAME_KEY3, ProcKeyUpKey3);
-      ScanKeyOne(KEY_NAME_KEY2, ProcKeyUpKey2);
-      SetMotorMode(GetMode());
-      
+      // ScanKeyOne(KEY_NAME_KEY3, ProcKeyUpKey3);
+      // ScanKeyOne(KEY_NAME_KEY2, ProcKeyUpKey2);
+      //SetMotorMode(GetMode());
+      //HeatOn();
+      //SetTemp(45);
       s_iCnt5 = 0;
     }
     else
     {
       s_iCnt5++;
-    }
-    
+    } 
   }
 }         
 
@@ -154,8 +155,13 @@ int main(void)
 { 
   InitSoftware();   //初始化软件相关函数
   InitHardware();   //初始化硬件相关函数
-  
-  printf("Init System has been finished.\r\n" );  //打印系统状态
+
+  DelayNms(1500);   //上电后需等待初始化
+  // N8900SetBTMode();
+  // DelayNms(300);    //指令间隔300ms以上
+  // N8900BTConnect();
+
+  N8900SendCmd(N8900_SONG_LAST,NULL,0);
   
   while(1)
   {

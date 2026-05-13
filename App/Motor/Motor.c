@@ -38,35 +38,10 @@
 /*********************************************************************************************************
 *                                              内部函数声明
 *********************************************************************************************************/
-static  void  ConfigMotorGPIO(void);  //配置Motor的GPIO
 
 /*********************************************************************************************************
 *                                              内部函数实现
 *********************************************************************************************************/
-/*********************************************************************************************************
-* 函数名称：ConfigMotorGPIO
-* 函数功能：配置Motor的GPIO 
-* 输入参数：void 
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2018年01月01日
-* 注    意：
-*********************************************************************************************************/
-static  void  ConfigMotorGPIO(void)
-{
-  // GPIO_InitTypeDef GPIO_InitStructure;  //GPIO_InitStructure用于存放GPIO的参数
-                                                                     
-  // //使能RCC相关时钟
-  // RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); //使能GPIOC的时钟
-                                                                                                                 
-  // GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_4;           //设置引脚
-  // GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
-  // GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;     //设置模式
-  // GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化LED1的GPIO
-
-  // GPIO_WriteBit(GPIOC, GPIO_Pin_4, Bit_SET);            //将LED1默认状态设置为点亮
-
-}
 
 /*********************************************************************************************************
 *                                              API函数实现
@@ -82,7 +57,7 @@ static  void  ConfigMotorGPIO(void)
 *********************************************************************************************************/
 void InitMotor(void)
 {
-  ConfigMotorGPIO();  //配置Motor的GPIO
+  
 }
 
 /*********************************************************************************************************
@@ -145,7 +120,6 @@ void SetMotorMode(u8 mode)
   {
   case STRONG:          //强震模式
     SetPWM(100);
-    printf("strong\n");
     break;
   case PULSE:           //脉冲模式，运行4s，停止1s
     cnt++;
@@ -161,11 +135,9 @@ void SetMotorMode(u8 mode)
         state=START;
       }
     }
-    printf("pulse\n");
     break;
   case SLEEP:           //睡眠模式
     AlterPWMDutyCycle();  
-    printf("sleep\n");
     break;
     
   default:
