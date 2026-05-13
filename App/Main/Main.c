@@ -111,12 +111,12 @@ static  void  Proc2msTask(void)
 
   if(Get2msFlag()){//2ms定时
     Clr2msFlag();
-    
+    //LEDFlicker(250);
     if(s_iCnt5 >= 4)
     {       
-      // ScanKeyOne(KEY_NAME_KEY3, ProcKeyUpKey3);
-      // ScanKeyOne(KEY_NAME_KEY2, ProcKeyUpKey2);
-      //SetMotorMode(GetMode());
+      ScanKeyOne(KEY_NAME_KEY3, OnKey3Event);
+      ScanKeyOne(KEY_NAME_KEY2, OnKey2Event);
+      SetMotorMode(GetMode());
       //HeatOn();
       //SetTemp(45);
       s_iCnt5 = 0;
@@ -156,13 +156,11 @@ int main(void)
   InitSoftware();   //初始化软件相关函数
   InitHardware();   //初始化硬件相关函数
 
-  DelayNms(1500);   //上电后需等待初始化
+  //DelayNms(1500);   //上电后需等待初始化
   // N8900SetBTMode();
   // DelayNms(300);    //指令间隔300ms以上
   // N8900BTConnect();
 
-  N8900SendCmd(N8900_SONG_LAST,NULL,0);
-  
   while(1)
   {
     Proc2msTask();  //2ms处理任务

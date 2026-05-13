@@ -39,7 +39,7 @@
 *********************************************************************************************************/
 //按键按下时的电压，0xFF表示按下为高电平，0x00表示按下为低电平
 static  u8  s_arrKeyDownLevel[KEY_NAME_MAX];      //使用前要在InitKeyOne函数中进行初始化   
-static  u8  s_arrKeyFlag[KEY_NAME_MAX];   //定义一个u8类型的数组，用于存放按键的标志位
+static KeyState s_key[KEY_NAME_MAX]; 
 /*********************************************************************************************************
 *                                              内部函数声明
 *********************************************************************************************************/
@@ -105,7 +105,7 @@ void InitKeyOne(void)
 
   for(i = 0; i < KEY_NAME_MAX; i++)
   {
-      s_arrKeyFlag[i] = TRUE;
+      s_key[i].flag = TRUE;
   }
 }
 
@@ -119,39 +119,73 @@ void InitKeyOne(void)
 * 注    意：如果s_arrKeyDownLevel[keyName] = 0xFF，对s_arrKeyDownLevel[keyName]直接取反得出的是256，而非0
 *           正确的做法是(u8)(~s_arrKeyDownLevel[keyName])，这样得出的才是0。
 *********************************************************************************************************/
-void ScanKeyOne(u8 keyName, void(*OnKeyOneUp)(void))
+void ScanKeyOne(u8 keyName, void(*OnKeyEvent)(KeyEvent))
 {
-  static  u8  s_arrKeyVal[KEY_NAME_MAX];    //定义一个u8类型的数组，用于存放按键的数值
+  KeyState *k = &s_key[keyName];
   
-  
-  s_arrKeyVal[keyName] = s_arrKeyVal[keyName] << 1;   //左移一位
+  k->keyVal = k->keyVal << 1;   //左移一位
 
   switch (keyName)
   {
     case KEY_NAME_KEY1:
-      s_arrKeyVal[keyName] = s_arrKeyVal[keyName] | KEY1; //按下/弹起时，KEY1为0/1
+      k->keyVal |= KEY1; //按下/弹起时，KEY1为0/1
       break;                                            
     case KEY_NAME_KEY2:                                 
-      s_arrKeyVal[keyName] = s_arrKeyVal[keyName] | KEY2; //按下/弹起时，KEY2为0/1
+      k->keyVal |= KEY2; //按下/弹起时，KEY2为0/1
       break;                                            
     case KEY_NAME_KEY3:                                 
-      s_arrKeyVal[keyName] = s_arrKeyVal[keyName] | KEY3; //按下/弹起时，KEY3为0/1
+      k->keyVal |= KEY3; //按下/弹起时，KEY3为0/1
       break;                                            
     default:
       break;
   }  
   
   //按键标志位的值为TRUE时，判断是否有按键有效按下
-  if(s_arrKeyVal[keyName] == s_arrKeyDownLevel[keyName] && s_arrKeyFlag[keyName] == TRUE)
+  if(k->keyVal == s_arrKeyDownLevel[keyName] && k->flag == TRUE)
   {
-    //(*OnKeyOneDown)();                    //执行按键按下的响应函数
-    s_arrKeyFlag[keyName] = FALSE;        //表示按键处于按下状态，按键标志位的值更改为FALSE
+    k->flag = FALSE;
+    k->pressCount = 0;
+    k->longFired = FALSE;
+  }
+
+  //按键标志位的值为FALSE时，判断是否有按键有效弹起
+  else if(k->keyVal == (u8)(~s_arrKeyDownLevel[keyName]) && k->flag == FALSE)
+  {
+    k->flag = TRUE;
+
+    if(k->longFired){         //判断长按是否已经触发
+      k->longFired = FALSE;
+      k->waitDouble = FALSE;
+      k->releaseCount = 0;
+    }
+    else if(k->waitDouble)    //第二次弹起
+    {
+      k->waitDouble = FALSE;
+      k->releaseCount = 0;
+      OnKeyEvent(KEY_EVENT_DOUBLE);
+    }
+    else{                     //第一次弹起，双击等待
+      k->waitDouble = TRUE;
+      k->releaseCount = 0;
+    }
   }
   
-  //按键标志位的值为FALSE时，判断是否有按键有效弹起
-  else if(s_arrKeyVal[keyName] == (u8)(~s_arrKeyDownLevel[keyName]) && s_arrKeyFlag[keyName] == FALSE)
-  {
-    (*OnKeyOneUp)();                      //执行按键弹起的响应函数
-    s_arrKeyFlag[keyName] = TRUE;         //表示按键处于弹起状态，按键标志位的值更改为TRUE
+  //长按计数
+  else if(k->flag == FALSE && !k->longFired){
+    k->pressCount++;
+    if(k->pressCount >= LONG_PRESS_COUNT){
+      k->longFired = TRUE;
+      k->waitDouble = FALSE;
+      OnKeyEvent(KEY_EVENT_LONG);
+    }
+  }
+
+  if(k->waitDouble){          
+    k->releaseCount++;
+    if(k->releaseCount>=DOUBLE_CLICK_COUNT){         //等待超时则判定为短按
+      k->waitDouble = FALSE;
+      k->releaseCount = 0;
+      OnKeyEvent(KEY_EVENT_UP);
+    }
   }
 }

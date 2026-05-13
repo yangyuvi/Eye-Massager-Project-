@@ -173,20 +173,20 @@ void N8900SetMusicMode(void)
 *********************************************************************************************************/
 void SetAudioMode(u8 mode)
 {
-  switch (mode)
-  {
-  case STRONG:
+  // switch (mode)
+  // {
+  // case STRONG:
     
-    break;
-  case PULSE:
+  //   break;
+  // case PULSE:
     
     
-    break;
-  case SLEEP:
+  //   break;
+  // case SLEEP:
     
-    break;
+  //   break;
     
-  default:
-    break;
-  }
+  // default:
+  //   break;
+  // }
 }

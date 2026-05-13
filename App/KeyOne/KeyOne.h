@@ -29,6 +29,8 @@
 #define  KEY_DOWN_LEVEL_KEY2    0x00     //0x00表示按下为低电平
 #define  KEY_DOWN_LEVEL_KEY3    0x00     //0x00表示按下为低电平
 
+#define LONG_PRESS_COUNT 200
+#define DOUBLE_CLICK_COUNT 40
 /*********************************************************************************************************
 *                                              枚举结构体定义
 *********************************************************************************************************/
@@ -40,10 +42,24 @@ typedef enum
   KEY_NAME_MAX
 }EnumKeyOneName;
 
+typedef enum{
+  KEY_EVENT_UP = 0,       //短按
+  KEY_EVENT_LONG,         //长按
+  KEY_EVENT_DOUBLE        //双击
+}KeyEvent;
+
+typedef struct {
+    u8  keyVal;           // 滑动窗口采样值
+    u8  flag;             // 弹起/按下标志
+    u16 pressCount;       // 按下持续计数，用于长按
+    u8  longFired;        // 长按已触发标志
+    u16 releaseCount;     // 弹起后计数，用于双击
+    u8  waitDouble;       // 正在等待第二次按下
+} KeyState;
 /*********************************************************************************************************
 *                                              API函数声明
 *********************************************************************************************************/
-void  InitKeyOne(void);                                                          //初始化KeyOne模块
-void  ScanKeyOne(u8 keyName, void(*OnKeyOneUp)(void));//每10ms调用一次
+void  InitKeyOne(void);                                   //初始化KeyOne模块
 
+void ScanKeyOne(u8 keyName, void(*OnKeyEvent)(KeyEvent));  //每10ms调用一次
 #endif

@@ -118,10 +118,10 @@ void SetMotorMode(u8 mode)
   
   switch (mode)
   {
-  case STRONG:          //强震模式
+  case MODE_STRONG:          //强震模式
     SetPWM(100);
     break;
-  case PULSE:           //脉冲模式，运行4s，停止1s
+  case MODE_PULSE:           //脉冲模式，运行4s，停止1s
     cnt++;
     if(state==START){   //启动状态
       StartMotor();
@@ -136,7 +136,7 @@ void SetMotorMode(u8 mode)
       }
     }
     break;
-  case SLEEP:           //睡眠模式
+  case MODE_SLEEP:           //睡眠模式
     AlterPWMDutyCycle();  
     break;
     

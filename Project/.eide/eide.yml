@@ -28,6 +28,7 @@ virtualFolder:
         - path: ../HW/UART1/Queue.c
         - path: ../HW/UART1/UART1.c
         - path: ../HW/PWM/PWM.c
+        - path: ../HW/ADC/ADC.c
       folders: []
     - name: OS
       files: []
@@ -80,6 +81,7 @@ targets:
         - ../App/Motor
         - ../App/Audio
         - ../App/Heat
+        - ../HW/ADC
       libList: []
     excludeList: []
     settings: {}
