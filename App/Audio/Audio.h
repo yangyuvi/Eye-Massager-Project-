@@ -30,7 +30,7 @@
 #define N8900_MODE_FM           0x0E
 
 //播放状态
-#define N8900_STATE_PAUSE       0x03        //播放/暂停
+#define N8900_PLAY_PAUSE       0x03        //播放/暂停
 #define N8900_SONG_LAST         0x04        //上一曲
 #define N8900_SONG_NEXT         0x05        //下一曲
 #define N8900_VOLUME_INC        0x07        //音量增
@@ -49,7 +49,7 @@
 *********************************************************************************************************/
 void  InitAudio(void);        //初始化Audio模块
 void  N8900SendCmd(u8 cmdType, u8 *data, u8 len);
-void  N8900SetBTMode(void);   
-void  N8900BTConnect(void);  
+void  BTModeInit(void);
+
 
 #endif

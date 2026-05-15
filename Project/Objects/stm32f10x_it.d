@@ -18,3 +18,13 @@
 .\objects\stm32f10x_it.o: ..\FW\inc\stm32f10x_tim.h
 .\objects\stm32f10x_it.o: ..\FW\inc\stm32f10x_usart.h
 .\objects\stm32f10x_it.o: ..\FW\inc\misc.h
+.\objects\stm32f10x_it.o: ..\OS\include\FreeRTOS.h
+.\objects\stm32f10x_it.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\objects\stm32f10x_it.o: ..\App\Main\FreeRTOSConfig.h
+.\objects\stm32f10x_it.o: ..\OS\include\projdefs.h
+.\objects\stm32f10x_it.o: ..\OS\include\portable.h
+.\objects\stm32f10x_it.o: ..\OS\include\deprecated_definitions.h
+.\objects\stm32f10x_it.o: ..\OS\portable\ARM_CM3\portmacro.h
+.\objects\stm32f10x_it.o: ..\OS\include\mpu_wrappers.h
+.\objects\stm32f10x_it.o: ..\OS\include\task.h
+.\objects\stm32f10x_it.o: ..\OS\include\list.h

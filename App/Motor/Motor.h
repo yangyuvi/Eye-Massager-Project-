@@ -36,5 +36,6 @@ void  InitMotor(void);        //³õÊ¼»¯MotorÄ£¿é
 void StartMotor(void);
 void StopMotor(void);
 void SetMotorStrength(u8 val);
-void SetMotorMode(u8 mode);
+void TaskMotorCreate(void);
+
 #endif

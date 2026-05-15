@@ -20,4 +20,4 @@
 .\objects\uart1.o: ..\FW\inc\stm32f10x_tim.h
 .\objects\uart1.o: ..\FW\inc\stm32f10x_usart.h
 .\objects\uart1.o: ..\FW\inc\misc.h
-.\objects\uart1.o: ..\HW\UART1\Queue.h
+.\objects\uart1.o: ..\HW\UART1\UARTQueue.h

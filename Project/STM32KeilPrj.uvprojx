@@ -334,7 +334,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\App\Main;..\App\DataType;..\HW\RCC;..\HW\Timer;..\HW\UART1;..\FW\inc;..\ARM\NVIC;..\ARM\SysTick;..\ARM\System;..\App\LED;..\App\KeyOne;..\HW\PWM</IncludePath>
+              <IncludePath>..\App\Main;..\App\DataType;..\HW\RCC;..\HW\Timer;..\HW\UART1;..\FW\inc;..\ARM\NVIC;..\ARM\SysTick;..\ARM\System;..\App\LED;..\App\KeyOne;..\HW\PWM;..\App\Motor;..\App\Heat;..\App\Audio;..\OS\portable;..\OS\include;..\OS\portable\ARM_CM3</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -397,6 +397,26 @@
               <FileType>1</FileType>
               <FilePath>..\App\KeyOne\ProcKeyOne.c</FilePath>
             </File>
+            <File>
+              <FileName>Audio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Audio\Audio.c</FilePath>
+            </File>
+            <File>
+              <FileName>Heat.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Heat\Heat.c</FilePath>
+            </File>
+            <File>
+              <FileName>Motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Motor\Motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>FreeRTOSConfig.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\App\Main\FreeRTOSConfig.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -416,11 +436,6 @@
               <FilePath>..\HW\Timer\Timer.c</FilePath>
             </File>
             <File>
-              <FileName>Queue.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HW\UART1\Queue.c</FilePath>
-            </File>
-            <File>
               <FileName>UART1.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HW\UART1\UART1.c</FilePath>
@@ -430,10 +445,62 @@
               <FileType>1</FileType>
               <FilePath>..\HW\PWM\PWM.c</FilePath>
             </File>
+            <File>
+              <FileName>UARTQueue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HW\UART1\UARTQueue.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>OS</GroupName>
+          <Files>
+            <File>
+              <FileName>timers.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\Source\timers.c</FilePath>
+            </File>
+            <File>
+              <FileName>tasks.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\Source\tasks.c</FilePath>
+            </File>
+            <File>
+              <FileName>stream_buffer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\Source\stream_buffer.c</FilePath>
+            </File>
+            <File>
+              <FileName>queue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\Source\queue.c</FilePath>
+            </File>
+            <File>
+              <FileName>list.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\Source\list.c</FilePath>
+            </File>
+            <File>
+              <FileName>event_groups.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\Source\event_groups.c</FilePath>
+            </File>
+            <File>
+              <FileName>croutine.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\Source\croutine.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap_4.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\portable\heap_4.c</FilePath>
+            </File>
+            <File>
+              <FileName>port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\OS\portable\ARM_CM3\port.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>TPSW</GroupName>

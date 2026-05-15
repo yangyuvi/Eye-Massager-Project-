@@ -19,11 +19,14 @@
 *********************************************************************************************************/
 #include "Main.h"
 #include "stm32f10x_conf.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+#include "event_groups.h"
+#include "common.h"
 #include "DataType.h"
 #include "NVIC.h"
-#include "SysTick.h"
 #include "RCC.h"
-#include "Timer.h"
 #include "UART1.h"
 #include "LED.h"
 #include "KeyOne.h"
@@ -38,8 +41,9 @@
 *********************************************************************************************************/
 
 /*********************************************************************************************************
-*                                              内部变量
+*                                              全局句柄定义
 *********************************************************************************************************/
+QueueHandle_t g_msgQueue = NULL;
 
 /*********************************************************************************************************
 *                                              枚举结构体定义
@@ -48,27 +52,11 @@
 /*********************************************************************************************************
 *                                              内部函数声明
 *********************************************************************************************************/
-static  void  InitSoftware(void);   //初始化软件相关的模块
 static  void  InitHardware(void);   //初始化硬件相关的模块
-static  void  Proc2msTask(void);    //2ms处理任务
-static  void  Proc1SecTask(void);   //1s处理任务
 
 /*********************************************************************************************************
 *                                              内部函数实现
 *********************************************************************************************************/
-/*********************************************************************************************************
-* 函数名称：InitSoftware
-* 函数功能：所有的软件相关的模块初始化函数都放在此函数中
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2018年01月01日
-* 注    意：
-*********************************************************************************************************/
-static  void  InitSoftware(void)
-{
-
-}
 
 /*********************************************************************************************************
 * 函数名称：InitHardware
@@ -85,9 +73,8 @@ static  void  InitHardware(void)
   InitRCC();          //初始化RCC模块
   InitNVIC();         //初始化NVIC模块
   InitUART1(9600);    //初始化UART模块
-  InitTimer();        //初始化Timer模块
   InitLED();          //初始化LED模块
-  InitSysTick();      //初始化SysTick模块
+  //InitSysTick();      //初始化SysTick模块
   InitKeyOne();       //初始化KeyOne模块
   InitProcKeyOne();   //初始化ProcKeyOne模块
   InitPWM();          //初始化PWM模块
@@ -95,51 +82,44 @@ static  void  InitHardware(void)
   InitAudio();        //初始化Audio模块
   InitHeat();         //初始化Heat模块
 }
-
 /*********************************************************************************************************
-* 函数名称：Proc2msTask
-* 函数功能：2ms处理任务 
+* 函数名称：ModeTask
+* 函数功能：模式管理任务 
 * 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2018年01月01日
+* 创建日期：2026年05月14日
 * 注    意：
 *********************************************************************************************************/
-static  void  Proc2msTask(void)
+static void ModeTask(void *parameters)        //进行模式管理任务调度
 {
-  static u8 s_iCnt5 = 0; 
+  AppMsg msg;
+  while(1){
+    if(xQueueReceive(g_msgQueue,&msg,portMAX_DELAY)){     //检测消息
+      switch(msg.type){
+        case MSG_MODE_CHANGE:
+          g_currentMode = (SystemMode)((g_currentMode + 1) % SYS_MODE_MAX); 
 
-  if(Get2msFlag()){//2ms定时
-    Clr2msFlag();
-    //LEDFlicker(250);
-    if(s_iCnt5 >= 4)
-    {       
-      ScanKeyOne(KEY_NAME_KEY3, OnKey3Event);
-      ScanKeyOne(KEY_NAME_KEY2, OnKey2Event);
-      SetMotorMode(GetMode());
-      //HeatOn();
-      //SetTemp(45);
-      s_iCnt5 = 0;
+          printf("mode = %d\n",g_currentMode);
+
+          //AudioPlayMode();    //语音播报模式
+          //SetTemp();
+          break;
+        case MSG_BT_PLAY_PAUSE:
+          N8900SendCmd(N8900_PLAY_PAUSE,NULL,0);    //播放/暂停
+          break;
+        case MSG_BT_NEXT:
+          N8900SendCmd(N8900_SONG_NEXT,NULL,0);     //下一曲
+          break;
+        default: break;
+      }
     }
-    else
-    {
-      s_iCnt5++;
-    } 
   }
-}         
+}
 
-/*********************************************************************************************************
-* 函数名称：Proc1SecTask
-* 函数功能：1s处理任务 
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2018年01月01日
-* 注    意：
-*********************************************************************************************************/
-static  void  Proc1SecTask(void)
-{ 
-  Clr1SecFlag();  //清除1s标志
+void TaskModeCreate(void)
+{
+   xTaskCreate(ModeTask,"ModeTask",512,NULL,3,NULL);
 }
 
 /*********************************************************************************************************
@@ -153,17 +133,19 @@ static  void  Proc1SecTask(void)
 *********************************************************************************************************/
 int main(void)
 { 
-  InitSoftware();   //初始化软件相关函数
   InitHardware();   //初始化硬件相关函数
+  printf("init\n");
 
-  //DelayNms(1500);   //上电后需等待初始化
-  // N8900SetBTMode();
-  // DelayNms(300);    //指令间隔300ms以上
-  // N8900BTConnect();
+  g_msgQueue = xQueueCreate(10,sizeof(char *));   //创建消息队列
 
-  while(1)
-  {
-    Proc2msTask();  //2ms处理任务
-    Proc1SecTask(); //1s处理任务   
-  }
+
+  //BTModeInit();
+
+  TaskModeCreate();
+  TaskKeyCreate();                  //创建按键任务
+  TaskMotorCreate();                //创建马达任务
+
+  vTaskStartScheduler();
+
+  while(1);
 }

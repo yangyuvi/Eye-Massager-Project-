@@ -18,12 +18,15 @@
 *                                              包含头文件
 *********************************************************************************************************/
 #include "ProcKeyOne.h"
-#include "LED.h"
-#include "UART1.h"
+#include "common.h"
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
+#define TASK_KEY_STACK_SIZE 256       //栈大小
+#define TASK_KEY_PRIO       1         //优先级
 
+static TaskHandle_t KeyTaskHandle = NULL;
+SystemMode g_currentMode = SYS_MODE_STRONG;
 /*********************************************************************************************************
 *                                              枚举结构体定义
 *********************************************************************************************************/
@@ -31,7 +34,7 @@
 /*********************************************************************************************************
 *                                              内部变量
 *********************************************************************************************************/
-static u8 mode = 0;
+
 /*********************************************************************************************************
 *                                              内部函数声明
 *********************************************************************************************************/
@@ -63,7 +66,7 @@ void InitProcKeyOne(void)
 * 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2026年05月12日
+* 创建日期：2026年05月13日
 * 注    意：
 *********************************************************************************************************/
 void OnKey1Event(KeyEvent event)
@@ -87,54 +90,44 @@ void OnKey1Event(KeyEvent event)
 
 /*********************************************************************************************************
 * 函数名称：OnKey2Event
-* 函数功能：处理按键2事件 
+* 函数功能：处理按键2事件，模式切换
 * 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2026年05月12日
+* 创建日期：2026年05月13日
 * 注    意：
 *********************************************************************************************************/
 void OnKey2Event(KeyEvent event)
 { 
-  //切换模式语音播报本地Flash
-  switch (event)
-  {
-  case KEY_EVENT_UP:
-    if(++mode == MODE_MAX){
-      mode = 0;
-    }
-    printf("%d\n",mode);
-    break;
-  case KEY_EVENT_DOUBLE:
-    printf("double\n");
-    break;
-  case KEY_EVENT_LONG:
-    printf("LONG\n");
-    break;
-  default:
-    break;
-  }
-  
-}
+  if (event != KEY_EVENT_UP) return;   // 只响应短按
+  AppMsg msg;
+  msg.type = MSG_MODE_CHANGE;
+  // msg.newMode = (g_currentMode+1) % SYS_MODE_MAX;    //模式切换
 
+  xQueueSend(g_msgQueue, &msg, 0);
+  // g_currentMode = msg.newMode;
+}
 /*********************************************************************************************************
 * 函数名称：OnKey3Event
-* 函数功能： 
+* 函数功能：处理按键3事件，控制音乐播放
 * 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2026年05月12日
+* 创建日期：2026年05月13日
 * 注    意：
 *********************************************************************************************************/
 void OnKey3Event(KeyEvent event)
 {  
+  AppMsg msg;
   switch (event)
   {
   case KEY_EVENT_UP:
-    
+    msg.type = MSG_BT_PLAY_PAUSE; 
+    // N8900SendCmd(N8900_PLAY_PAUSE,NULL,0);    //短按播放/暂停
     break;
   case KEY_EVENT_DOUBLE:
-    
+    // N8900SendCmd(N8900_SONG_NEXT,NULL,0);     //双击下一曲
+    msg.type = MSG_BT_NEXT;
     break;
   case KEY_EVENT_LONG:
     
@@ -142,17 +135,32 @@ void OnKey3Event(KeyEvent event)
   default:
     break;
   }
-  
+  xQueueSend(g_msgQueue, &msg, 0);
 }
 /*********************************************************************************************************
-* 函数名称：GetMode
-* 函数功能：获取模式
+* 函数名称：KeyTask
+* 函数功能：按键扫描任务
 * 输入参数：void
 * 输出参数：u8 Mode
 * 返 回 值：void
-* 创建日期：2026年05月12日
+* 创建日期：2026年05月14日
 * 注    意：
 *********************************************************************************************************/
-u8 GetMode(void){
-  return mode;
+static void KeyTask(void *parameters)
+{
+  TickType_t xLastWakeTime = xTaskGetTickCount();
+
+  while (1)
+  {
+    ScanKeyOne(KEY_NAME_KEY2, OnKey2Event);
+    ScanKeyOne(KEY_NAME_KEY3, OnKey3Event);
+    // printf("KeyTask\n");
+    vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));       //每10ms执行一次
+  }
+
+}
+
+void TaskKeyCreate(void)
+{
+  xTaskCreate(KeyTask, "KeyTask", TASK_KEY_STACK_SIZE, NULL, TASK_KEY_PRIO, &KeyTaskHandle);
 }

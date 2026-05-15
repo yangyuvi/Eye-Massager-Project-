@@ -20,7 +20,6 @@
 .\objects\main.o: ..\FW\inc\misc.h
 .\objects\main.o: ..\App\DataType\DataType.h
 .\objects\main.o: ..\ARM\NVIC\NVIC.h
-.\objects\main.o: ..\ARM\SysTick\SysTick.h
 .\objects\main.o: ..\HW\RCC\RCC.h
 .\objects\main.o: ..\HW\Timer\Timer.h
 .\objects\main.o: ..\HW\UART1\UART1.h
@@ -29,3 +28,6 @@
 .\objects\main.o: ..\App\KeyOne\KeyOne.h
 .\objects\main.o: ..\App\KeyOne\ProcKeyOne.h
 .\objects\main.o: ..\HW\PWM\PWM.h
+.\objects\main.o: ..\App\Motor\Motor.h
+.\objects\main.o: ..\App\Audio\Audio.h
+.\objects\main.o: ..\App\Heat\Heat.h

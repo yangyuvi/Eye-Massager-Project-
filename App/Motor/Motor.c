@@ -20,13 +20,16 @@
 #include "Motor.h"
 #include "stm32f10x_conf.h"
 #include "PWM.h"
-#include "ProcKeyOne.h"
-#include "UART1.h"
+#include "common.h"
+
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
 #define START 0
 #define STOP 1
+
+#define TASK_MOTOR_STACK_SIZE 256
+#define TASK_MOTOR_PRIO       2
 /*********************************************************************************************************
 *                                              枚举结构体定义
 *********************************************************************************************************/
@@ -34,6 +37,7 @@
 /*********************************************************************************************************
 *                                              内部变量
 *********************************************************************************************************/
+TaskHandle_t MotorTaskHandle = NULL;
 
 /*********************************************************************************************************
 *                                              内部函数声明
@@ -102,45 +106,57 @@ void SetMotorStrength(u8 val)
   SetPWM(val);
 }
 
+
 /*********************************************************************************************************
-* 函数名称：SetMotorStrength
-* 函数功能：设置Motor模式
-* 输入参数：mode
+* 函数名称：MotorTask
+* 函数功能：
+* 输入参数：
 * 输出参数：void
 * 返 回 值：void
 * 创建日期：2026年05月11日
-* 注    意：每10ms调用一次
+* 注    意：
 *********************************************************************************************************/
-void SetMotorMode(u8 mode)
+static void MotorTask(void *parameters)
 {
   static u8 state;
   static u16 cnt;
-  
-  switch (mode)
+
+  while (1)
   {
-  case MODE_STRONG:          //强震模式
-    SetPWM(100);
-    break;
-  case MODE_PULSE:           //脉冲模式，运行4s，停止1s
-    cnt++;
-    if(state==START){   //启动状态
-      StartMotor();
-      if(cnt==400){     
-        state=STOP;
+    switch (g_currentMode)
+    {
+    case SYS_MODE_STRONG:          //强震模式
+      SetPWM(100);
+      break;
+
+    case SYS_MODE_PULSE:           //脉冲模式，运行4s，停止1s
+      cnt++;
+      if(state==START){            //启动状态
+        StartMotor();
+        if(cnt==400){     
+          state=STOP;
+        }
+      }else{                        //停止状态
+        StopMotor();
+        if(cnt==500){
+          cnt=0;
+          state=START;
+        }
       }
-    }else{              //停止状态
-      StopMotor();
-      if(cnt==500){
-        cnt=0;
-        state=START;
-      }
+      break;
+
+    case SYS_MODE_SLEEP:            //睡眠模式
+      AlterPWMDutyCycle();  
+      break;
+      
+    default:
+      break;
     }
-    break;
-  case MODE_SLEEP:           //睡眠模式
-    AlterPWMDutyCycle();  
-    break;
-    
-  default:
-    break;
+    vTaskDelay(10);
   }
+}
+
+void TaskMotorCreate(void)
+{
+  xTaskCreate(MotorTask,"MotorTask",TASK_MOTOR_STACK_SIZE,NULL,TASK_MOTOR_PRIO,&MotorTaskHandle);
 }

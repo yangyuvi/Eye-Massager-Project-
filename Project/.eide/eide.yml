@@ -14,24 +14,34 @@ virtualFolder:
         - path: ../App/LED/LED.c
         - path: ../App/KeyOne/KeyOne.c
         - path: ../App/KeyOne/ProcKeyOne.c
-        - path: ../App/Motor/Motor.c
-        - path: ../App/Heat/Heat.c
+        - path: ../App/Main/FreeRTOSConfig.h
         - path: ../App/Audio/Audio.c
+        - path: ../App/Heat/Heat.c
+        - path: ../App/Main/common.h
+        - path: ../App/Motor/Motor.c
       folders: []
     - name: Alg
-      files: []
+      files:
+        - path: ../App/Motor/Motor.c
       folders: []
     - name: HW
       files:
         - path: ../HW/RCC/RCC.c
-        - path: ../HW/Timer/Timer.c
-        - path: ../HW/UART1/Queue.c
         - path: ../HW/UART1/UART1.c
         - path: ../HW/PWM/PWM.c
-        - path: ../HW/ADC/ADC.c
+        - path: ../HW/UART1/UARTQueue.c
       folders: []
     - name: OS
-      files: []
+      files:
+        - path: ../OS/Source/croutine.c
+        - path: ../OS/Source/event_groups.c
+        - path: ../OS/Source/list.c
+        - path: ../OS/Source/queue.c
+        - path: ../OS/Source/stream_buffer.c
+        - path: ../OS/Source/tasks.c
+        - path: ../OS/Source/timers.c
+        - path: ../OS/portable/heap_4.c
+        - path: ../OS/portable/ARM_CM3/port.c
       folders: []
     - name: TPSW
       files: []
@@ -48,7 +58,6 @@ virtualFolder:
     - name: ARM
       files:
         - path: ../ARM/NVIC/NVIC.c
-        - path: ../ARM/SysTick/SysTick.c
         - path: ../ARM/System/core_cm3.c
         - path: ../ARM/System/stm32f10x_it.c
         - path: ../ARM/System/system_stm32f10x.c
@@ -78,10 +87,12 @@ targets:
         - ../App/LED
         - ../App/KeyOne
         - ../HW/PWM
-        - ../App/Motor
-        - ../App/Audio
+        - ../OS/include
+        - ../OS/portable
+        - ../OS/portable/ARM_CM3
         - ../App/Heat
-        - ../HW/ADC
+        - ../App/Audio
+        - ../App/Motor
       libList: []
     excludeList: []
     settings: {}
