@@ -74,7 +74,6 @@ static  void  InitHardware(void)
   InitNVIC();         //初始化NVIC模块
   InitUART1(9600);    //初始化UART模块
   InitLED();          //初始化LED模块
-  //InitSysTick();      //初始化SysTick模块
   InitKeyOne();       //初始化KeyOne模块
   InitProcKeyOne();   //初始化ProcKeyOne模块
   InitPWM();          //初始化PWM模块
@@ -97,11 +96,8 @@ static void ModeTask(void *parameters)        //进行模式管理任务调度
   while(1){
     if(xQueueReceive(g_msgQueue,&msg,portMAX_DELAY)){     //检测消息
       switch(msg.type){
-        case MSG_MODE_CHANGE:
+        case MSG_MODE_CHANGE:                             //改变模式
           g_currentMode = (SystemMode)((g_currentMode + 1) % SYS_MODE_MAX); 
-
-          printf("mode = %d\n",g_currentMode);
-
           //AudioPlayMode();    //语音播报模式
           //SetTemp();
           break;
@@ -134,17 +130,15 @@ void TaskModeCreate(void)
 int main(void)
 { 
   InitHardware();   //初始化硬件相关函数
-  printf("init\n");
 
   g_msgQueue = xQueueCreate(10,sizeof(char *));   //创建消息队列
-
 
   //BTModeInit();
 
   TaskModeCreate();
-  TaskKeyCreate();                  //创建按键任务
-  TaskMotorCreate();                //创建马达任务
-
+  // TaskKeyCreate();                  //创建按键任务
+  // TaskMotorCreate();                //创建马达任务
+  // TaskHeatCreate();                 //创建加热任务
   vTaskStartScheduler();
 
   while(1);

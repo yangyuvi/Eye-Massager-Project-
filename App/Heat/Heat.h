@@ -35,7 +35,6 @@
 void  InitHeat(void);       //初始化Heat模块
 void HeatOn(void);          //加热开启模块
 void HeatOff(void);         //加热关闭模块
-u8 DetectTemp(void);        //检测温度模块
-void SetTemp(u8 temp);      //设置温度模块
-
+void DetectTemp(void);        //检测温度模块
+void TaskHeatCreate(void);
 #endif

@@ -19,13 +19,16 @@
 *********************************************************************************************************/
 #include "Heat.h"
 #include "stm32f10x_conf.h"
-#include "ProcKeyOne.h"
-#include "UART1.h"
+#include "ADC.h"
+#include "common.h"
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
 #define HYSTTEMP 1      //1°C的回差
 #define HIGHTEMP 50     //过热保护
+
+#define TASK_HEAT_STACK_SIZE  256
+#define TASK_HEAT_PRIO        2
 /*********************************************************************************************************
 *                                              枚举结构体定义
 *********************************************************************************************************/
@@ -33,6 +36,9 @@
 /*********************************************************************************************************
 *                                              内部变量
 *********************************************************************************************************/
+TaskHandle_t s_tempTaskHandle = NULL;
+
+static float s_maxTemp;
 
 /*********************************************************************************************************
 *                                              内部函数声明
@@ -94,7 +100,7 @@ void HeatOn(void)
 {
   GPIO_WriteBit(GPIOB, GPIO_Pin_7, Bit_SET);    
   GPIO_WriteBit(GPIOB, GPIO_Pin_8, Bit_SET);  
-  GPIO_WriteBit(GPIOB, GPIO_Pin_9, Bit_SET);       
+  GPIO_WriteBit(GPIOB, GPIO_Pin_9, Bit_SET);    
 }
 
 /*********************************************************************************************************
@@ -122,29 +128,52 @@ void HeatOff(void)
 * 创建日期：2026年05月12日
 * 注    意：
 *********************************************************************************************************/
-u8 DetectTemp(void)
+void DetectTemp(void)
 {
-  u8 temp=0;
-  
-  return temp;
+  //读取ADC值转电压值
+  float leftVol = GetADCVal1() / 4095 * 3.3;
+  float rightVol = GetADCVal2() / 4095 * 3.3;
+
+  //由电压值对应热敏电阻阻值
+  //查表法 阻值转换为温度
+  float leftTemp = 0;
+  float rightTemp = 0;
+
+  s_maxTemp = (leftTemp > rightTemp) ? leftTemp : rightTemp;
 }
 
 /*********************************************************************************************************
-* 函数名称：SetTemp
-* 函数功能：控制温度模块
+* 函数名称：HeatTask
+* 函数功能：控制温度模块,使温度维持在固定值
 * 输入参数：要设定的温度temp
 * 输出参数：void
 * 返 回 值：void
 * 创建日期：2026年05月12日
 * 注    意：开关控制
 *********************************************************************************************************/
-void SetTemp(u8 temp)
+static void HeatTask(void *para)
 {
-  u8 nowTemp = DetectTemp();
-  if((nowTemp < temp - HYSTTEMP) && (nowTemp < HIGHTEMP)){   //当前温度小于设定温度
-    HeatOn();                           //开启加热
+  u8 targetTemp = 45;
+
+  while(1){
+    DetectTemp();    //读取当前温度
+    
+    if(s_maxTemp >= HIGHTEMP)            //过热保护
+    {
+      HeatOff();
+    }
+    else if(s_maxTemp < targetTemp - HYSTTEMP){   //当前温度小于设定温度
+      HeatOn();                           //开启加热
+    }
+    else if(s_maxTemp > targetTemp + HYSTTEMP){
+      HeatOff();                          //关闭加热
+    }
+    vTaskDelay(pdMS_TO_TICKS(100));
   }
-  else if(nowTemp > temp + HYSTTEMP){
-    HeatOff();                          //关闭加热
-  }
+}
+
+void TaskHeatCreate(void)
+{
+  xTaskCreate(HeatTask, "HeatTask", TASK_HEAT_STACK_SIZE,
+              NULL, TASK_HEAT_PRIO, &s_tempTaskHandle);
 }

@@ -30,6 +30,7 @@ virtualFolder:
         - path: ../HW/UART1/UART1.c
         - path: ../HW/PWM/PWM.c
         - path: ../HW/UART1/UARTQueue.c
+        - path: ../HW/ADC/ADC.c
       folders: []
     - name: OS
       files:
@@ -54,6 +55,8 @@ virtualFolder:
         - path: ../FW/src/stm32f10x_rcc.c
         - path: ../FW/src/stm32f10x_tim.c
         - path: ../FW/src/stm32f10x_usart.c
+        - path: ../FW/src/stm32f10x_dma.c
+        - path: ../FW/src/stm32f10x_adc.c
       folders: []
     - name: ARM
       files:
@@ -93,6 +96,7 @@ targets:
         - ../App/Heat
         - ../App/Audio
         - ../App/Motor
+        - ../HW/ADC
       libList: []
     excludeList: []
     settings: {}

@@ -35,7 +35,8 @@
 *********************************************************************************************************/
 void InitADC(void);  //初始化ADC模块
 
-u8   WriteADCBuf(u16 d); //向ADC缓冲区写入数据
-u8   ReadADCBuf(u16 *p); //从ADC缓冲区读取数据
+u16 GetADCVal1(void);
+
+u16 GetADCVal2(void);
 
 #endif
