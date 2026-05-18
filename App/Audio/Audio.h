@@ -27,10 +27,19 @@
 //工作模式
 #define N8900_MODE_BT           0x0F        //蓝牙模式
 #define N8900_MODE_MUSIC        0x0D        //音乐模式
-#define N8900_MODE_FM           0x0E
+#define N8900_MODE_FM           0x0E        //收音模式
+
+//音乐模式控制
+#define N8900_FLASH_PLAY        0x3A        //播放Flash
+#define LOOP_MODE               0x3C        //循环模式设置
+#define SINGLE_SONG_STOP        0x05        //单曲停止
+#define SELECT_TRACK            0x32        //选择曲目
+#define VOICE_MODE_STRONG       5           //曲目序号
+#define VOICE_MODE_PULSE        4
+#define VOICE_MODE_SLEEP        2
 
 //播放状态
-#define N8900_PLAY_PAUSE       0x03        //播放/暂停
+#define N8900_PLAY_PAUSE        0x03        //播放/暂停
 #define N8900_SONG_LAST         0x04        //上一曲
 #define N8900_SONG_NEXT         0x05        //下一曲
 #define N8900_VOLUME_INC        0x07        //音量增
@@ -50,6 +59,6 @@
 void  InitAudio(void);        //初始化Audio模块
 void  N8900SendCmd(u8 cmdType, u8 *data, u8 len);
 void  BTModeInit(void);
-
+void  AudioPlayMode(u16 song);
 
 #endif

@@ -41,7 +41,18 @@
 /*********************************************************************************************************
 *                                              内部函数实现
 *********************************************************************************************************/
-
+static  void  ConfigAudioGPIO(void)
+{
+  // GPIO_InitTypeDef GPIO_InitStructure;  //GPIO_InitStructure用于存放GPIO的参数
+                                                                     
+  // //使能RCC相关时钟
+  // RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); //使能GPIOC的时钟
+                                                                                                                 
+  // GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_5;           //设置引脚
+  // GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
+  // GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPU;        //设置模式
+  // GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化GPIO
+}
 /*********************************************************************************************************
 *                                              API函数实现
 *********************************************************************************************************/
@@ -56,7 +67,7 @@
 *********************************************************************************************************/
 void InitAudio(void)
 {
-
+  ConfigAudioGPIO();
 }
 
 /*********************************************************************************************************
@@ -134,37 +145,7 @@ void N8900BTDisconnect(void)
 }
 
 /*********************************************************************************************************
-* 函数名称：N8900BTGetStatus
-* 函数功能：查询蓝牙状态
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：返回状态字节
-* 创建日期：2026年05月13日
-* 注    意：
-*********************************************************************************************************/
-u8 N8900BTGetStatus(void)
-{
-  N8900SendCmd(BT_STATUS,NULL,0);
-
-  return 0xFF;      //读取失败
-}
-
-/*********************************************************************************************************
-* 函数名称：N8900SetMusicMode
-* 函数功能：切换到音乐模式
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2026年05月13日
-* 注    意：
-*********************************************************************************************************/
-void N8900SetMusicMode(void)
-{
-  N8900SendCmd(N8900_MODE_MUSIC,NULL,0);
-}
-
-/*********************************************************************************************************
-* 函数名称：BTModeInitTask
+* 函数名称：BTModeTask
 * 函数功能：蓝牙模式初始化
 * 输入参数：void
 * 输出参数：void
@@ -172,44 +153,67 @@ void N8900SetMusicMode(void)
 * 创建日期：2026年05月14日
 * 注    意：
 *********************************************************************************************************/
-void BTModeInitTask(void *para)
+void BTModeTask(void *para)
 {
   vTaskDelay(pdMS_TO_TICKS(1500));    //上电后需等待初始化
   N8900SetBTMode();
   vTaskDelay(pdMS_TO_TICKS(300));     //指令间隔300ms以上
   N8900BTConnect();
-  vTaskDelay(NULL);
+  vTaskDelete(NULL);
 }
 void BTModeInit(void)
 {
-  xTaskCreate(BTModeInitTask, "BTInit", 256, NULL, 3, NULL);
+  xTaskCreate(BTModeTask, "BTInit", 256, NULL, 3, NULL);
 }
 
 /*********************************************************************************************************
-* 函数名称：SetAudioMode
-* 函数功能：设置Audio模式
-* 输入参数：mode
+* 函数名称：N8900_IsBusy
+* 函数功能：检测N8900模块是否正在播放
+* 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2026年05月11日
-* 注    意：每10ms调用一次
+* 创建日期：2026年05月16日
+* 注    意：
 *********************************************************************************************************/
-void SetAudioMode(u8 mode)
+u8 N8900_IsBusy(void)
 {
-  // switch (mode)
-  // {
-  // case STRONG:
-    
-  //   break;
-  // case PULSE:
-    
-    
-  //   break;
-  // case SLEEP:
-    
-  //   break;
-    
-  // default:
-  //   break;
-  // }
+    // BUSY 低电平 = 正在播放，高电平 = 空闲
+    return (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5) == 0);
 }
+
+/*********************************************************************************************************
+* 函数名称：AudioPlayMode
+* 函数功能：语音播报当前模式
+* 输入参数：void
+* 输出参数：void
+* 返 回 值：void
+* 创建日期：2026年05月16日
+* 注    意：
+*********************************************************************************************************/
+void AudioPlayMode(u16 song)
+{
+  u8 data1 = SINGLE_SONG_STOP;
+  u8 data2[2];
+  data2[0] = (song >> 8) & 0xFF;   //高字节
+  data2[1] = song & 0xFF;          //低字节
+
+  N8900SendCmd(N8900_MODE_MUSIC,NULL,0);  //音乐模式
+  vTaskDelay(pdMS_TO_TICKS(300));
+  N8900SendCmd(N8900_FLASH_PLAY,NULL,0);  //Flash播放
+  vTaskDelay(pdMS_TO_TICKS(200));
+  N8900SendCmd(LOOP_MODE,&data1,1);       //循环模式设置为单曲停止
+  vTaskDelay(pdMS_TO_TICKS(200));
+  N8900SendCmd(SELECT_TRACK,data2,2);     //选择播放的曲目,两字节数据分别为曲目序号的高低字节
+
+  //监听BUSY引脚，等待播放完成
+  // while (N8900_IsBusy()) {
+  //   vTaskDelay(pdMS_TO_TICKS(50));  // 每 50ms 检测一次
+  // }
+
+  //切回蓝牙模式
+  N8900SetBTMode();
+  vTaskDelay(pdMS_TO_TICKS(300));
+  N8900BTConnect();                   //重新连接手机
+  vTaskDelay(pdMS_TO_TICKS(300));
+}
+

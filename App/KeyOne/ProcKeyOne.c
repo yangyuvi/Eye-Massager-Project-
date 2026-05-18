@@ -19,6 +19,8 @@
 *********************************************************************************************************/
 #include "ProcKeyOne.h"
 #include "common.h"
+#include "Audio.h"
+#include "LED.h"
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
@@ -107,6 +109,7 @@ void OnKey2Event(KeyEvent event)
   xQueueSend(g_msgQueue, &msg, 0);
   // g_currentMode = msg.newMode;
 }
+
 /*********************************************************************************************************
 * 函数名称：OnKey3Event
 * 函数功能：处理按键3事件，控制音乐播放
@@ -122,21 +125,19 @@ void OnKey3Event(KeyEvent event)
   switch (event)
   {
   case KEY_EVENT_UP:
-    msg.type = MSG_BT_PLAY_PAUSE; 
-    // N8900SendCmd(N8900_PLAY_PAUSE,NULL,0);    //短按播放/暂停
+    N8900SendCmd(N8900_PLAY_PAUSE,NULL,0);    //短按播放/暂停
     break;
   case KEY_EVENT_DOUBLE:
-    // N8900SendCmd(N8900_SONG_NEXT,NULL,0);     //双击下一曲
-    msg.type = MSG_BT_NEXT;
+    N8900SendCmd(N8900_SONG_NEXT,NULL,0);     //双击下一曲
     break;
   case KEY_EVENT_LONG:
-    
     break;
   default:
     break;
   }
   xQueueSend(g_msgQueue, &msg, 0);
 }
+
 /*********************************************************************************************************
 * 函数名称：KeyTask
 * 函数功能：按键扫描任务
@@ -154,7 +155,6 @@ static void KeyTask(void *parameters)
   {
     ScanKeyOne(KEY_NAME_KEY2, OnKey2Event);
     ScanKeyOne(KEY_NAME_KEY3, OnKey3Event);
-    // printf("KeyTask\n");
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));       //每10ms执行一次
   }
 
@@ -164,3 +164,4 @@ void TaskKeyCreate(void)
 {
   xTaskCreate(KeyTask, "KeyTask", TASK_KEY_STACK_SIZE, NULL, TASK_KEY_PRIO, &KeyTaskHandle);
 }
+
