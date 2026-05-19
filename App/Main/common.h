@@ -40,10 +40,15 @@ typedef enum{
 } SystemMode;
 
 typedef enum{
+    AUDIO_MODE_MUSIC = 0,
+    AUDIO_MODE_BT,
+    //AUDIO_MODE_FM,
+    AUDIO_MODE_MAX
+} AudioMode;                //不同音源定义
+
+typedef enum{
     MSG_MODE_CHANGE = 0,
-    MSG_BT_PLAY_PAUSE,
-    MSG_BT_NEXT,
-    MSG_BT_LAST
+    MSG_N8900_CHANGE
 } MsgType;
 
 //定义消息结构
@@ -57,5 +62,6 @@ typedef struct {
 *********************************************************************************************************/
 extern QueueHandle_t g_msgQueue;
 extern SystemMode g_currentMode;
+extern AudioMode g_n8900Mode;
 
 #endif

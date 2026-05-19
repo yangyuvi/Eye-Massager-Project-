@@ -21,11 +21,11 @@
 #include "stm32f10x_conf.h"
 #include "UART1.h"
 #include "common.h"
+#include "LED.h"
 
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
-
 /*********************************************************************************************************
 *                                              枚举结构体定义
 *********************************************************************************************************/
@@ -41,18 +41,79 @@
 /*********************************************************************************************************
 *                                              内部函数实现
 *********************************************************************************************************/
-static  void  ConfigAudioGPIO(void)
-{
-  // GPIO_InitTypeDef GPIO_InitStructure;  //GPIO_InitStructure用于存放GPIO的参数
+// static  void  ConfigAudioGPIO(void)
+// {
+//   GPIO_InitTypeDef GPIO_InitStructure;  //GPIO_InitStructure用于存放GPIO的参数
                                                                      
-  // //使能RCC相关时钟
-  // RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); //使能GPIOC的时钟
+//   //使能RCC相关时钟
+//   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能GPIOC的时钟
                                                                                                                  
-  // GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_5;           //设置引脚
-  // GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
-  // GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPU;        //设置模式
-  // GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化GPIO
+//   GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_10;           //设置引脚
+//   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
+//   GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;        //设置模式
+//   GPIO_Init(GPIOB, &GPIO_InitStructure);                //根据参数初始化GPIO
+// }
+
+/*********************************************************************************************************
+* 函数名称：N8900SetBTMode
+* 函数功能：切换到蓝牙模式
+* 输入参数：void
+* 输出参数：void
+* 返 回 值：void
+* 创建日期：2026年05月13日
+* 注    意：
+*********************************************************************************************************/
+static void N8900SetBTMode(void)
+{
+  N8900SendCmd(N8900_MODE_BT,NULL,0);
 }
+
+static void N8900SetMusicMode(void)
+{
+  N8900SendCmd(N8900_MODE_MUSIC,NULL,0);
+}
+/*********************************************************************************************************
+* 函数名称：N8900BTConnect
+* 函数功能：发起蓝牙连接
+* 输入参数：void
+* 输出参数：void
+* 返 回 值：void
+* 创建日期：2026年05月13日
+* 注    意：
+*********************************************************************************************************/
+static void N8900BTConnect(void)
+{
+  N8900SendCmd(BT_CONNECT,NULL,0);
+}
+
+/*********************************************************************************************************
+* 函数名称：N8900BTDisconnect
+* 函数功能：断开蓝牙连接
+* 输入参数：void
+* 输出参数：void
+* 返 回 值：void
+* 创建日期：2026年05月13日
+* 注    意：
+*********************************************************************************************************/
+static void N8900BTDisconnect(void)
+{
+  N8900SendCmd(BT_DISCONNECT,NULL,0);
+}
+
+/*********************************************************************************************************
+* 函数名称：N8900SetVolume
+* 函数功能：设置音量大小
+* 输入参数：void
+* 输出参数：void
+* 返 回 值：void
+* 创建日期：2026年05月13日
+* 注    意：
+*********************************************************************************************************/
+static void N8900SetVolume(u8 *vol)
+{
+  N8900SendCmd(N8900_VOLUME_SET,vol,1);
+}
+
 /*********************************************************************************************************
 *                                              API函数实现
 *********************************************************************************************************/
@@ -67,7 +128,7 @@ static  void  ConfigAudioGPIO(void)
 *********************************************************************************************************/
 void InitAudio(void)
 {
-  ConfigAudioGPIO();
+  // ConfigAudioGPIO();
 }
 
 /*********************************************************************************************************
@@ -102,69 +163,6 @@ void N8900SendCmd(u8 cmdType, u8 *data, u8 len)
   WriteUART1(sendBuf,len+4);
 }
 
-/*********************************************************************************************************
-* 函数名称：N8900SetBTMode
-* 函数功能：切换到蓝牙模式
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2026年05月13日
-* 注    意：
-*********************************************************************************************************/
-void N8900SetBTMode(void)
-{
-  N8900SendCmd(N8900_MODE_BT,NULL,0);
-}
-
-/*********************************************************************************************************
-* 函数名称：N8900BTConnect
-* 函数功能：发起蓝牙连接
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2026年05月13日
-* 注    意：
-*********************************************************************************************************/
-void N8900BTConnect(void)
-{
-  N8900SendCmd(BT_CONNECT,NULL,0);
-}
-
-/*********************************************************************************************************
-* 函数名称：N8900BTDisconnect
-* 函数功能：断开蓝牙连接
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2026年05月13日
-* 注    意：
-*********************************************************************************************************/
-void N8900BTDisconnect(void)
-{
-  N8900SendCmd(BT_DISCONNECT,NULL,0);
-}
-
-/*********************************************************************************************************
-* 函数名称：BTModeTask
-* 函数功能：蓝牙模式初始化
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2026年05月14日
-* 注    意：
-*********************************************************************************************************/
-void BTModeTask(void *para)
-{
-  vTaskDelay(pdMS_TO_TICKS(1500));    //上电后需等待初始化
-  N8900SetBTMode();
-  vTaskDelay(pdMS_TO_TICKS(300));     //指令间隔300ms以上
-  N8900BTConnect();
-  vTaskDelete(NULL);
-}
-void BTModeInit(void)
-{
-  xTaskCreate(BTModeTask, "BTInit", 256, NULL, 3, NULL);
-}
 
 /*********************************************************************************************************
 * 函数名称：N8900_IsBusy
@@ -175,10 +173,78 @@ void BTModeInit(void)
 * 创建日期：2026年05月16日
 * 注    意：
 *********************************************************************************************************/
-u8 N8900_IsBusy(void)
+// u8 N8900_IsBusy(void)
+// {
+//     // BUSY 低电平 = 正在播放，高电平 = 空闲
+//     return (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_10) == 0);
+// }
+
+/*********************************************************************************************************
+* 函数名称：AudioPlayMode
+* 函数功能：语音播报当前模式
+* 输入参数：void
+* 输出参数：void
+* 返 回 值：void
+* 创建日期：2026年05月16日
+* 注    意：
+*********************************************************************************************************/
+void AudioPlayMode(void)
 {
-    // BUSY 低电平 = 正在播放，高电平 = 空闲
-    return (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5) == 0);
+  u8 vol=6;
+  u8 loopMode;
+  u8 data2[2];
+  u16 song = 0;
+  u16 bgm = 0;
+
+  //匹配需要播放的曲目
+  switch (g_currentMode) {
+    case SYS_MODE_STRONG:
+      song = VOICE_MODE_STRONG; 
+      bgm = SONG_STRONG;        
+      break;
+    case SYS_MODE_PULSE:
+      song = VOICE_MODE_PULSE;
+      bgm = SONG_PULSE;
+      break;
+    case SYS_MODE_SLEEP:
+      song = VOICE_MODE_SLEEP;
+      bgm = SONG_SLEEP;
+      break;
+    default: break;
+  }
+
+  loopMode = SINGLE_SONG_STOP;
+  data2[0] = (song >> 8) & 0xFF;   //高字节
+  data2[1] = song & 0xFF;          //低字节
+
+  N8900SetVolume(&vol);
+  vTaskDelay(pdMS_TO_TICKS(100));
+  // if(g_n8900Mode!=AUDIO_MODE_MUSIC){
+    // N8900SetMusicMode();  //音乐模式
+    // vTaskDelay(pdMS_TO_TICKS(300));
+  // }
+  N8900SendCmd(N8900_FLASH_PLAY,NULL,0);  //Flash播放
+  vTaskDelay(pdMS_TO_TICKS(200));
+  N8900SendCmd(LOOP_MODE,&loopMode,1);       //循环模式设置为单曲停止
+  vTaskDelay(pdMS_TO_TICKS(100));
+  N8900SendCmd(SELECT_TRACK,data2,2);     //选择播放的曲目,两字节数据分别为曲目序号的高低字节
+  vTaskDelay(pdMS_TO_TICKS(1800));
+
+  //监听BUSY引脚，等待播放完成
+  // while (N8900_IsBusy()) {
+  //   LEDOn();
+  //   vTaskDelay(pdMS_TO_TICKS(50));  // 每 50ms 检测一次
+  // }
+  //   LEDOff();
+
+  loopMode = SINGLE_SONG_LOOP;
+  N8900SendCmd(LOOP_MODE,&loopMode,1);       
+  vTaskDelay(pdMS_TO_TICKS(100));
+
+  data2[0] = (bgm >> 8) & 0xFF;   //高字节
+  data2[1] = bgm & 0xFF;          //低字节
+  N8900SendCmd(SELECT_TRACK,data2,2);     //选择播放的曲目,两字节数据分别为曲目序号的高低字节
+
 }
 
 /*********************************************************************************************************
@@ -190,30 +256,17 @@ u8 N8900_IsBusy(void)
 * 创建日期：2026年05月16日
 * 注    意：
 *********************************************************************************************************/
-void AudioPlayMode(u16 song)
+void AudioChangeMode(void)
 {
-  u8 data1 = SINGLE_SONG_STOP;
-  u8 data2[2];
-  data2[0] = (song >> 8) & 0xFF;   //高字节
-  data2[1] = song & 0xFF;          //低字节
-
-  N8900SendCmd(N8900_MODE_MUSIC,NULL,0);  //音乐模式
-  vTaskDelay(pdMS_TO_TICKS(300));
-  N8900SendCmd(N8900_FLASH_PLAY,NULL,0);  //Flash播放
-  vTaskDelay(pdMS_TO_TICKS(200));
-  N8900SendCmd(LOOP_MODE,&data1,1);       //循环模式设置为单曲停止
-  vTaskDelay(pdMS_TO_TICKS(200));
-  N8900SendCmd(SELECT_TRACK,data2,2);     //选择播放的曲目,两字节数据分别为曲目序号的高低字节
-
-  //监听BUSY引脚，等待播放完成
-  // while (N8900_IsBusy()) {
-  //   vTaskDelay(pdMS_TO_TICKS(50));  // 每 50ms 检测一次
-  // }
-
-  //切回蓝牙模式
-  N8900SetBTMode();
-  vTaskDelay(pdMS_TO_TICKS(300));
-  N8900BTConnect();                   //重新连接手机
-  vTaskDelay(pdMS_TO_TICKS(300));
+  switch (g_n8900Mode)
+  {
+  case AUDIO_MODE_MUSIC:
+    N8900SetMusicMode();
+    break;
+  case AUDIO_MODE_BT:
+    N8900SetBTMode();
+    break;
+  default:
+    break;
+  }
 }
-

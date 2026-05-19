@@ -28,7 +28,8 @@
 #define TASK_KEY_PRIO       1         //优先级
 
 static TaskHandle_t KeyTaskHandle = NULL;
-SystemMode g_currentMode = SYS_MODE_STRONG;
+SystemMode g_currentMode  = SYS_MODE_STRONG;
+AudioMode  g_n8900Mode    = AUDIO_MODE_MUSIC;
 /*********************************************************************************************************
 *                                              枚举结构体定义
 *********************************************************************************************************/
@@ -131,11 +132,12 @@ void OnKey3Event(KeyEvent event)
     N8900SendCmd(N8900_SONG_NEXT,NULL,0);     //双击下一曲
     break;
   case KEY_EVENT_LONG:
+    msg.type = MSG_N8900_CHANGE;
+    xQueueSend(g_msgQueue, &msg, 0);
     break;
   default:
     break;
   }
-  xQueueSend(g_msgQueue, &msg, 0);
 }
 
 /*********************************************************************************************************

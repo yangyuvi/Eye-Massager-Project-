@@ -98,23 +98,14 @@ static void ModeTask(void *parameters)        //进行模式管理任务调度
       switch(msg.type){
         case MSG_MODE_CHANGE:                             //改变模式
           g_currentMode = (SystemMode)((g_currentMode + 1) % SYS_MODE_MAX); 
-          // switch (g_currentMode) {
-          //   case SYS_MODE_STRONG:
-          //     voiceNum = VOICE_MODE_STRONG; break;
-          //   case SYS_MODE_PULSE:
-          //     voiceNum = VOICE_MODE_PULSE; break;
-          //   case SYS_MODE_SLEEP:
-          //     voiceNum = VOICE_MODE_SLEEP; break;
-          //   default: break;
-          //AudioPlayMode(voiceNum);    //语音播报模式
+          AudioPlayMode();    //语音播报模式
           //SetTemp();
           break;
-        // case MSG_BT_PLAY_PAUSE:
-        //   N8900SendCmd(N8900_PLAY_PAUSE,NULL,0);    //播放/暂停
-        //   break;
-        // case MSG_BT_NEXT:
-        //   N8900SendCmd(N8900_SONG_NEXT,NULL,0);     //下一曲
-        //   break;
+
+        case MSG_N8900_CHANGE:
+          g_n8900Mode = (AudioMode)((g_n8900Mode + 1) % AUDIO_MODE_MAX);
+          AudioChangeMode();
+          break;
         default: break;
       }
     }
@@ -140,8 +131,6 @@ int main(void)
   InitHardware();   //初始化硬件相关函数
 
   g_msgQueue = xQueueCreate(10,sizeof(AppMsg));   //创建消息队列
-
-  BTModeInit();             //上电后进入蓝牙模式，建立连接
 
   TaskModeCreate();
   TaskKeyCreate();                  //创建按键任务
