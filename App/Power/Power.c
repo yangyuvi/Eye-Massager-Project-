@@ -1,9 +1,9 @@
 /*********************************************************************************************************
-* 模块名称：LED.c
-* 摘    要：LED模块
+* 模块名称：Power.c
+* 摘    要：Power模块
 * 当前版本：1.0.0
 * 作    者：YYW
-* 完成日期：2020年01月01日 
+* 完成日期：2026年05月19日 
 * 内    容：
 * 注    意：                                                                  
 **********************************************************************************************************
@@ -17,128 +17,167 @@
 /*********************************************************************************************************
 *                                              包含头文件
 *********************************************************************************************************/
-#include "LED.h"
+#include "Power.h"
 #include "stm32f10x_conf.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "LED.h"
 
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
+#define TASK_CHG_PRIO       1
+#define TASK_CHG_STACK_SIZE 256
+static TaskHandle_t s_chgTaskHandle = NULL;
 
 /*********************************************************************************************************
 *                                              枚举结构体定义
 *********************************************************************************************************/
+//充电状态
+typedef enum{
+  CHG_CHARGING = 0,     //正在充电
+  CHG_IDLE,             //放电
+  CHG_CHARGED           //充电完成
+}BatState_t;
+
+//电源状态
+typedef enum {
+  PWR_OFF = 0,        // 关机
+  PWR_ON             // 开机运行
+  // PWR_STANDBY         // 待机（低功耗）
+} PwrState_t;
 
 /*********************************************************************************************************
 *                                              内部变量
 *********************************************************************************************************/
-
+PwrState_t pwrState;
 /*********************************************************************************************************
 *                                              内部函数声明
 *********************************************************************************************************/
-static  void  ConfigLEDGPIO(void);  //配置LED的GPIO
+static  void  ConfigPowerGPIO(void);  //配置Power的GPIO
 
 /*********************************************************************************************************
 *                                              内部函数实现
 *********************************************************************************************************/
 /*********************************************************************************************************
-* 函数名称：ConfigLEDGPIO
-* 函数功能：配置LED的GPIO 
+* 函数名称：ConfigPowerGPIO
+* 函数功能：配置Power的GPIO 
 * 输入参数：void 
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2018年01月01日
+* 创建日期：2026年05月19日
 * 注    意：
 *********************************************************************************************************/
-static  void  ConfigLEDGPIO(void)
+static  void  ConfigPowerGPIO(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;  //GPIO_InitStructure用于存放GPIO的参数
                                                                      
   //使能RCC相关时钟
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); //使能GPIOC的时钟
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);         //使能GPIOA的时钟
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);         //使能GPIOC的时钟
                                                                                                                  
-  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_4;           //设置引脚
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
-  GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;     //设置模式
-  GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化LED1的GPIO
+  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1|GPIO_Pin_2;      //设置引脚
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;           //设置I/O输出速度
+  GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IN_FLOATING;      //设置模式
+  GPIO_Init(GPIOA, &GPIO_InitStructure);                      //根据参数初始化GPIO
 
-  GPIO_WriteBit(GPIOC, GPIO_Pin_4, Bit_RESET);            //将LED1默认状态设置为点亮
+  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_4;                 //设置引脚
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;           //设置I/O输出速度
+  GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;           //设置模式
+  GPIO_Init(GPIOC, &GPIO_InitStructure);                      //根据参数初始化GPIO
 
-  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_5;           //设置引脚
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
-  GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;     //设置模式
-  GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化LED2的GPIO
-
-  GPIO_WriteBit(GPIOC, GPIO_Pin_5, Bit_RESET);          //将LED2默认状态设置为熄灭
+  GPIO_SetBits(GPIOC, GPIO_Pin_4);                            //默认开机
 }
 
 /*********************************************************************************************************
 *                                              API函数实现
 *********************************************************************************************************/
 /*********************************************************************************************************
-* 函数名称：InitLED
-* 函数功能：初始化LED模块
+* 函数名称：InitPower
+* 函数功能：初始化Power模块
 * 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2018年01月01日
+* 创建日期：2026年05月19日
 * 注    意：
 *********************************************************************************************************/
-void InitLED(void)
+void InitPower(void)
 {
-  ConfigLEDGPIO();  //配置LED的GPIO
+  ConfigPowerGPIO();  //配置Power的GPIO
 }
 
 /*********************************************************************************************************
-* 函数名称：LEDFlicker
-* 函数功能：LED闪烁函数
-* 输入参数：cnt
+* 函数名称：PowerGetStatus
+* 函数功能：获取电池充电状态
+* 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2018年01月01日
-* 注    意：LEDFlicker在Proc2msTask中调用，cnt为250时表示每500ms更改一次LED状态
+* 创建日期：2026年05月19日
+* 注    意：
 *********************************************************************************************************/
-void LEDFlicker(u16 cnt)
+static BatState_t PowerGetStatus(void)
 {
-  static u16 s_iCnt;  //定义静态变量s_iCnt作为计数器
-  
-  s_iCnt++; //计数器的计数值加1
-  
-  if(s_iCnt >= cnt)   //计数器的计数值大于cnt
-  { 
-    s_iCnt = 0;       //重置计数器的计数值为0
+  u8 chrg = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_1);
+  u8 stdby = GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_2);
+  BatState_t batState;
 
-    //LED1状态取反，实现LED0闪烁
-    GPIO_WriteBit(GPIOC, GPIO_Pin_4, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOC, GPIO_Pin_4)));
-    
-    //LED2状态取反，实现LED1闪烁
-    GPIO_WriteBit(GPIOC, GPIO_Pin_5, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOC, GPIO_Pin_5)));
+  if (chrg == 0 && stdby == 1) {        //表示正在充电
+    batState = CHG_CHARGING;
+  }   
+  else if (chrg == 1 && stdby == 0) {   //表示充电完成
+    batState = CHG_CHARGED;
+  } 
+  else {                                //两个引脚都为高电平，电池处于放电/待机状态
+    batState = CHG_IDLE;
+  } 
+  return batState;
+}
+
+static void ChargeTask(void *pvParameters)
+{
+  BatState_t status;
+  while (1)
+  {
+    status = PowerGetStatus();
+    switch (status)
+    {
+    case CHG_CHARGING:
+      LED1On();
+      break;
+    default:
+      LED1Off();
+      break;
+    }
+    vTaskDelay(pdMS_TO_TICKS(500));
   }
+
+}
+
+void TaskChargeCreate(void)
+{
+  xTaskCreate(ChargeTask, "Charge", TASK_CHG_STACK_SIZE,
+              NULL, TASK_CHG_PRIO, &s_chgTaskHandle);
 }
 
 /*********************************************************************************************************
-* 函数名称：InitLED
-* 函数功能：初始化LED模块
+* 函数名称：PowerShutdown
+* 函数功能：电源开关机
 * 输入参数：void
 * 输出参数：void
 * 返 回 值：void
-* 创建日期：2018年01月01日
+* 创建日期：2026年05月19日
 * 注    意：
 *********************************************************************************************************/
-void LED1On(void)
+void PowerShutdown(void)
 {
-  GPIO_WriteBit(GPIOC, GPIO_Pin_4, Bit_SET);            //将LED1设置为点亮
+  //关闭所有外设
+  //指示灯
+
+  //断电
+  GPIO_ResetBits(GPIOC,GPIO_Pin_4);
+
+  //死循环
+  while (1){}
+  
 }
 
-/*********************************************************************************************************
-* 函数名称：InitLED
-* 函数功能：初始化LED模块
-* 输入参数：void
-* 输出参数：void
-* 返 回 值：void
-* 创建日期：2018年01月01日
-* 注    意：
-*********************************************************************************************************/
-void LED1Off(void)
-{
-  GPIO_WriteBit(GPIOC, GPIO_Pin_4, Bit_RESET); 
-}

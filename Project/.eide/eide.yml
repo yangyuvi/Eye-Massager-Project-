@@ -19,6 +19,7 @@ virtualFolder:
         - path: ../App/Heat/Heat.c
         - path: ../App/Main/common.h
         - path: ../App/Motor/Motor.c
+        - path: ../App/Power/Power.c
       folders: []
     - name: Alg
       files:
@@ -97,6 +98,7 @@ targets:
         - ../App/Audio
         - ../App/Motor
         - ../HW/ADC
+        - ../App/Power
       libList: []
     excludeList: []
     settings: {}

@@ -35,6 +35,7 @@
 #include "Motor.h"
 #include "Audio.h"
 #include "Heat.h"
+#include "Power.h"
 
 /*********************************************************************************************************
 *                                              宏定义
@@ -70,6 +71,7 @@ static  void  InitHardware(void);   //初始化硬件相关的模块
 static  void  InitHardware(void)
 {  
   SystemInit();       //系统初始化
+  InitPower();        //初始化电源管理
   InitRCC();          //初始化RCC模块
   InitNVIC();         //初始化NVIC模块
   InitUART1(9600);    //初始化UART模块
@@ -133,9 +135,10 @@ int main(void)
   g_msgQueue = xQueueCreate(10,sizeof(AppMsg));   //创建消息队列
 
   TaskModeCreate();
-  TaskKeyCreate();                  //创建按键任务
-  // TaskMotorCreate();                //创建马达任务
-  // TaskHeatCreate();                 //创建加热任务
+  TaskKeyCreate();                      //创建按键任务
+  TaskChargeCreate();                   //充电检测
+  // TaskMotorCreate();                 //创建马达任务
+  // TaskHeatCreate();                  //创建加热任务
   vTaskStartScheduler();
 
   while(1);

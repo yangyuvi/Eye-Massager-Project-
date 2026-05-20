@@ -20,7 +20,8 @@
 #include "ProcKeyOne.h"
 #include "common.h"
 #include "Audio.h"
-#include "LED.h"
+#include "Power.h"
+
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
@@ -83,7 +84,7 @@ void OnKey1Event(KeyEvent event)
     
     break;
   case KEY_EVENT_LONG:
-    
+    PowerShutdown();
     break;
   default:
     break;
@@ -155,6 +156,7 @@ static void KeyTask(void *parameters)
 
   while (1)
   {
+    ScanKeyOne(KEY_NAME_KEY1, OnKey1Event);
     ScanKeyOne(KEY_NAME_KEY2, OnKey2Event);
     ScanKeyOne(KEY_NAME_KEY3, OnKey3Event);
     vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));       //每10ms执行一次
