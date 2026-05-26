@@ -25,11 +25,11 @@
 *                                              宏定义
 *********************************************************************************************************/
 //各个按键按下的电平
-#define  KEY_DOWN_LEVEL_KEY1    0x00     //0x00表示按下为低电平
+#define  KEY_DOWN_LEVEL_KEY1    0xFF     //0xFF表示按下为高电平
 #define  KEY_DOWN_LEVEL_KEY2    0x00     //0x00表示按下为低电平
 #define  KEY_DOWN_LEVEL_KEY3    0x00     //0x00表示按下为低电平
 
-#define LONG_PRESS_COUNT 200
+#define LONG_PRESS_COUNT 100
 #define DOUBLE_CLICK_COUNT 40
 /*********************************************************************************************************
 *                                              枚举结构体定义

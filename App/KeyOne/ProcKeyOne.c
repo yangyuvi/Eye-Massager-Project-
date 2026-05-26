@@ -21,7 +21,7 @@
 #include "common.h"
 #include "Audio.h"
 #include "Power.h"
-
+#include "Audio.h"
 /*********************************************************************************************************
 *                                              宏定义
 *********************************************************************************************************/
@@ -78,13 +78,12 @@ void OnKey1Event(KeyEvent event)
   switch (event)
   {
   case KEY_EVENT_UP:
-    
+    GPIO_SetBits(GPIOC,GPIO_Pin_4);   //开机
     break;
   case KEY_EVENT_DOUBLE:
-    
     break;
   case KEY_EVENT_LONG:
-    PowerShutdown();
+    PowerShutdown();                  //关机 
     break;
   default:
     break;
@@ -104,6 +103,7 @@ void OnKey1Event(KeyEvent event)
 void OnKey2Event(KeyEvent event)
 { 
   if (event != KEY_EVENT_UP) return;   // 只响应短按
+
   AppMsg msg;
   msg.type = MSG_MODE_CHANGE;
   // msg.newMode = (g_currentMode+1) % SYS_MODE_MAX;    //模式切换

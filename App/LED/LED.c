@@ -56,19 +56,13 @@ static  void  ConfigLEDGPIO(void)
   //使能RCC相关时钟
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); //使能GPIOC的时钟
                                                                                                                  
-  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_4;           //设置引脚
+  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_7|GPIO_Pin_8;           //设置引脚
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
   GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;     //设置模式
   GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化LED1的GPIO
 
-  GPIO_WriteBit(GPIOC, GPIO_Pin_4, Bit_RESET);            //将LED1默认状态设置为点亮
-
-  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_5;           //设置引脚
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;     //设置I/O输出速度
-  GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;     //设置模式
-  GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化LED2的GPIO
-
-  GPIO_WriteBit(GPIOC, GPIO_Pin_5, Bit_RESET);          //将LED2默认状态设置为熄灭
+  GPIO_WriteBit(GPIOC, GPIO_Pin_7, Bit_RESET);            //将LED1默认状态设置为点亮
+  GPIO_WriteBit(GPIOC, GPIO_Pin_8, Bit_RESET);            //将LED1默认状态设置为点亮
 }
 
 /*********************************************************************************************************
@@ -126,7 +120,7 @@ void LEDFlicker(u16 cnt)
 *********************************************************************************************************/
 void LED1On(void)
 {
-  GPIO_WriteBit(GPIOC, GPIO_Pin_4, Bit_SET);            //将LED1设置为点亮
+  GPIO_WriteBit(GPIOC, GPIO_Pin_7, Bit_SET);            //将LED1设置为点亮
 }
 
 /*********************************************************************************************************
@@ -140,5 +134,5 @@ void LED1On(void)
 *********************************************************************************************************/
 void LED1Off(void)
 {
-  GPIO_WriteBit(GPIOC, GPIO_Pin_4, Bit_RESET); 
+  GPIO_WriteBit(GPIOC, GPIO_Pin_7, Bit_RESET); 
 }

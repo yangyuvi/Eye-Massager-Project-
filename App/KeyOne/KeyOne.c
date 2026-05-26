@@ -24,11 +24,11 @@
 *                                              宏定义
 *********************************************************************************************************/
 //KEY1为读取PC1引脚电平
-#define KEY1    (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_1)) 
+#define KEY1    (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_12)) 
 //KEY2为读取PC2引脚电平
-#define KEY2    (GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2)) 
+#define KEY2    (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_13)) 
 //KEY3为读取PA0引脚电平
-#define KEY3    (GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0))  
+#define KEY3    (GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_14))  
 
 /*********************************************************************************************************
 *                                              枚举结构体定义
@@ -62,23 +62,22 @@ static  void  ConfigKeyOneGPIO(void)
   GPIO_InitTypeDef GPIO_InitStructure;  //GPIO_InitStructure用于存放GPIO的参数
   
   //使能RCC相关时钟
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE); //使能GPIOA的时钟
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE); //使能GPIOC的时钟
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE); //使能GPIOA的时钟
   
   //配置PC1
-  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_1;           //设置引脚
+  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_12;           //设置引脚
   GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPU;        //设置输入类型
-  GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化GPIO
+  GPIO_Init(GPIOB, &GPIO_InitStructure);                //根据参数初始化GPIO
   
   //配置PC2
-  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_2;           //设置引脚
+  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_13;           //设置引脚
   GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPU;        //设置输入类型
-  GPIO_Init(GPIOC, &GPIO_InitStructure);                //根据参数初始化GPIO
+  GPIO_Init(GPIOB, &GPIO_InitStructure);                //根据参数初始化GPIO
 
   //配置PA0
-  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_0;           //设置引脚
+  GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_14;           //设置引脚
   GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_IPU;        //设置输入类型
-  GPIO_Init(GPIOA, &GPIO_InitStructure);                //根据参数初始化GPIO
+  GPIO_Init(GPIOB, &GPIO_InitStructure);                //根据参数初始化GPIO
 }
 
 /*********************************************************************************************************
@@ -99,7 +98,7 @@ void InitKeyOne(void)
 
   ConfigKeyOneGPIO(); //配置按键的GPIO 
                                                                 
-  s_arrKeyDownLevel[KEY_NAME_KEY1] = KEY_DOWN_LEVEL_KEY1;  //按键KEY1按下时为低电平
+  s_arrKeyDownLevel[KEY_NAME_KEY1] = KEY_DOWN_LEVEL_KEY1;  //按键KEY1按下时为高电平
   s_arrKeyDownLevel[KEY_NAME_KEY2] = KEY_DOWN_LEVEL_KEY2;  //按键KEY2按下时为低电平
   s_arrKeyDownLevel[KEY_NAME_KEY3] = KEY_DOWN_LEVEL_KEY3;  //按键KEY3按下时为低电平
 

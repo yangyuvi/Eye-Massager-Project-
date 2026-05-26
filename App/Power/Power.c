@@ -26,8 +26,8 @@
 /*********************************************************************************************************
 *                                              ∫Í∂®“Â
 *********************************************************************************************************/
-#define TASK_CHG_PRIO       1
-#define TASK_CHG_STACK_SIZE 256
+#define TASK_CHG_PRIO       4
+#define TASK_CHG_STACK_SIZE 512
 static TaskHandle_t s_chgTaskHandle = NULL;
 
 /*********************************************************************************************************
@@ -133,7 +133,7 @@ static BatState_t PowerGetStatus(void)
   return batState;
 }
 
-static void ChargeTask(void *pvParameters)
+static void ChargeTask(void *para)
 {
   BatState_t status;
   while (1)

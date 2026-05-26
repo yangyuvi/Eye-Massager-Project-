@@ -334,7 +334,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_HD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\App\Main;..\App\DataType;..\HW\RCC;..\HW\Timer;..\HW\UART1;..\FW\inc;..\ARM\NVIC;..\ARM\SysTick;..\ARM\System;..\App\LED;..\App\KeyOne;..\HW\PWM;..\App\Motor;..\App\Heat;..\App\Audio;..\OS\portable;..\OS\include;..\OS\portable\ARM_CM3</IncludePath>
+              <IncludePath>..\App\Main;..\App\DataType;..\HW\RCC;..\HW\Timer;..\HW\UART1;..\FW\inc;..\ARM\NVIC;..\ARM\SysTick;..\ARM\System;..\App\LED;..\App\KeyOne;..\HW\PWM;..\App\Motor;..\App\Heat;..\App\Audio;..\OS\portable;..\OS\include;..\OS\portable\ARM_CM3;..\App\Power;..\HW\ADC</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -417,6 +417,11 @@
               <FileType>5</FileType>
               <FilePath>..\App\Main\FreeRTOSConfig.h</FilePath>
             </File>
+            <File>
+              <FileName>Power.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\Power\Power.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -429,11 +434,6 @@
               <FileName>RCC.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HW\RCC\RCC.c</FilePath>
-            </File>
-            <File>
-              <FileName>Timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HW\Timer\Timer.c</FilePath>
             </File>
             <File>
               <FileName>UART1.c</FileName>
@@ -547,11 +547,6 @@
               <FileName>NVIC.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\ARM\NVIC\NVIC.c</FilePath>
-            </File>
-            <File>
-              <FileName>SysTick.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\ARM\SysTick\SysTick.c</FilePath>
             </File>
             <File>
               <FileName>core_cm3.c</FileName>

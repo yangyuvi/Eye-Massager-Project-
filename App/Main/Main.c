@@ -131,14 +131,13 @@ void TaskModeCreate(void)
 int main(void)
 { 
   InitHardware();   //初始化硬件相关函数
-
   g_msgQueue = xQueueCreate(10,sizeof(AppMsg));   //创建消息队列
 
   TaskModeCreate();
   TaskKeyCreate();                      //创建按键任务
   TaskChargeCreate();                   //充电检测
-  // TaskMotorCreate();                 //创建马达任务
-  // TaskHeatCreate();                  //创建加热任务
+  TaskMotorCreate();                    //创建马达任务
+  TaskHeatCreate();                  //创建加热任务
   vTaskStartScheduler();
 
   while(1);
